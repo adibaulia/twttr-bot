@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -13,7 +12,6 @@ import (
 )
 
 var client *twitter.Client
-var count int
 
 type Request struct {
 	Tweet string `json:"tweet,omitempty"`
@@ -60,8 +58,8 @@ func createTweet(c echo.Context) error {
 
 func forFun(t time.Time) {
 
-	tweet := `NGELU NDASKU ` + `(` + strconv.Itoa(count) + `)`
-	count++
+	now := time.Now().Format("030405")
+	tweet := `NGELU NDASKU ` + `(` + now + `)`
 	_, resp, err := client.Statuses.Update(tweet, nil)
 	if err != nil {
 		log.Print(err)
