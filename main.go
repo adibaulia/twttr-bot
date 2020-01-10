@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -12,10 +13,10 @@ import (
 )
 
 func main() {
-
+	port := os.Getenv("PORT")
 	e := echo.New()
-	e.POST("/", simple)
-	e.Logger.Fatal(e.Start(":3003"))
+	e.GET("/", simple)
+	e.Logger.Fatal(e.Start(":" + port))
 
 }
 
@@ -31,8 +32,9 @@ func simple(c echo.Context) error {
 	_, resp, err := client.Statuses.Update(fmt.Sprintf("just setting up my twttr %s", time.Now()), nil)
 	if err != nil {
 		log.Print(err)
+		return c.JSON(http.StatusBadRequest, http.Response{Status: err.Error()})
 	}
 	log.Print("OKOKOKOKOKO")
 	log.Print(resp)
-	return nil
+	return c.JSON(http.StatusOK, http.Response{Status: "Tweeted"})
 }
