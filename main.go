@@ -37,7 +37,9 @@ func init() {
 	httpClient := config.Client(oauth1.NoContext, token)
 	// Twitter client
 	client = twitter.NewClient(httpClient)
-	doEvery(20*time.Second, forFun)
+	for {
+		doEvery(2*time.Second, forFun)
+	}
 }
 
 func createTweet(c echo.Context) error {
@@ -57,7 +59,6 @@ func createTweet(c echo.Context) error {
 }
 
 func forFun(t time.Time) {
-
 	now := time.Now().Format("030405")
 	tweet := `NGELU NDASKU ` + `(` + now + `)`
 	_, resp, err := client.Statuses.Update(tweet, nil)
