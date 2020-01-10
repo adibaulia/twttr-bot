@@ -25,7 +25,6 @@ func main() {
 	tweet := e.Group("/tweet")
 	tweet.POST("/create", createTweet)
 	e.Logger.Fatal(e.Start(":" + port))
-	doEvery(20*time.Second, forFun)
 }
 
 func doEvery(d time.Duration, f func(time.Time)) {
@@ -40,6 +39,7 @@ func init() {
 	httpClient := config.Client(oauth1.NoContext, token)
 	// Twitter client
 	client = twitter.NewClient(httpClient)
+	doEvery(20*time.Second, forFun)
 }
 
 func createTweet(c echo.Context) error {
