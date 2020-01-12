@@ -60,7 +60,7 @@ func createTweet(c echo.Context) error {
 
 func forFun(t time.Time) {
 	now := time.Now().Format("030405")
-	tweet := `NGELU NDASKU ` + `(` + now + `)`
+	tweet := `_________ is the cutest girl i ever met ` + `(` + now + `)`
 	_, resp, err := client.Statuses.Update(tweet, nil)
 	if err != nil {
 		log.Print(err)
