@@ -22,6 +22,7 @@ func main() {
 	e := echo.New()
 	tweet := e.Group("/tweet")
 	tweet.POST("/create", createTweet)
+	e.POST("/dev/webhooks", webhookEvent)
 	e.Logger.Fatal(e.Start(":" + port))
 }
 
@@ -29,6 +30,9 @@ func doEvery(d time.Duration, f func(time.Time)) {
 	for x := range time.Tick(d) {
 		f(x)
 	}
+}
+func webhookEvent(c echo.Context) error {
+	return nil
 }
 
 func init() {
