@@ -77,7 +77,7 @@ func webhookEvent(c echo.Context) error {
 			// 	log.Fatal(err)
 			// }
 			ref := Conn.DBConn.NewRef("/")
-			if err := ref.Set(ctx, val.Message.Data); err != nil {
+			if err := ref.Set(ctx, &val.Message.Data); err != nil {
 				log.Fatalln("Error reading from database:", err)
 			}
 
