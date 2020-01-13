@@ -59,15 +59,20 @@ func webhookEvent(c echo.Context) error {
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
 		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
-			_, _, err := client.Statuses.Update(val.Message.Data.Text, nil)
-			if err != nil {
-				log.Print(err)
-			}
+			time.Sleep(time.Second * 10)
+			go postTweet(val.Message.Data.Text)
 		}
 	}
 
 	return nil
 
+}
+
+func postTweet(text string) {
+	_, _, err := client.Statuses.Update(text, nil)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func init() {
