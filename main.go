@@ -54,7 +54,7 @@ func webhookEvent(c echo.Context) error {
 		return err
 	}
 
-	log.Print(body)
+	log.Print(body.DirectMessageEvent.(string))
 	return nil
 
 }
