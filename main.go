@@ -113,7 +113,7 @@ func init() {
 	// }
 	log.Print(dir)
 	ctx := context.Background()
-	opt := option.WithCredentialsFile(dir + "twttr-bot-3dd9a-firebase-adminsdk-a9cni-2c1179fc4a.json")
+	opt := option.WithCredentialsFile(dir + "/twttr-bot-3dd9a-firebase-adminsdk-a9cni-2c1179fc4a.json")
 	configDB := &firebase.Config{
 		ProjectID:   "twttr-bot-3dd9a",
 		DatabaseURL: "https://twttr-bot-3dd9a.firebaseio.com",
