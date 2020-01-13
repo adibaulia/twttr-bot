@@ -28,8 +28,34 @@ type Request struct {
 	Crc_token string `json:"crc_token,omitempty" form:"crc_token" query:"crc_token"`
 }
 
-type DMevent struct {
-	ForUserID string `json:"for_user_id"`
+type DMEvent struct {
+	ForUserID           string                `json:"for_user_id"`
+	DirectMessageEvents []DirectMessageEvents `json:"direct_message_events"`
+}
+type Target struct {
+	RecipientID string `json:"recipient_id"`
+}
+type Entities struct {
+	Hashtags     []interface{} `json:"hashtags"`
+	Symbols      []interface{} `json:"symbols"`
+	UserMentions []interface{} `json:"user_mentions"`
+	Urls         []interface{} `json:"urls"`
+}
+type MessageData struct {
+	Text     string   `json:"text"`
+	Entities Entities `json:"entities"`
+}
+type MessageCreate struct {
+	Target      Target      `json:"target"`
+	SenderID    string      `json:"sender_id"`
+	SourceAppID string      `json:"source_app_id"`
+	MessageData MessageData `json:"message_data"`
+}
+type DirectMessageEvents struct {
+	Type             string        `json:"type"`
+	ID               string        `json:"id"`
+	CreatedTimestamp string        `json:"created_timestamp"`
+	MessageCreate    MessageCreate `json:"message_create"`
 }
 
 func main() {
@@ -48,7 +74,7 @@ func doEvery(d time.Duration, f func(time.Time)) {
 	}
 }
 func webhookEvent(c echo.Context) error {
-	body := new(DMevent)
+	body := new(DMEvent)
 	if err := c.Bind(body); err != nil {
 		log.Print("ERROR", err)
 		return err
