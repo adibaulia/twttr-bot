@@ -59,8 +59,8 @@ func webhookEvent(c echo.Context) error {
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
 		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
-			time.Sleep(time.Second * 10)
-			go postTweet(val.Message.Data.Text)
+			time.Sleep(time.Second * 30)
+			postTweet(val.Message.Data.Text)
 		}
 	}
 
