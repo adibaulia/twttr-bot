@@ -28,8 +28,8 @@ type Request struct {
 	Crc_token string `json:"crc_token,omitempty" form:"crc_token" query:"crc_token"`
 }
 
-type DM struct {
-	DirectMessageEvent interface{} `json:"direct_message_event"`
+type DMevent struct {
+	ForUserID string `json:"for_user_id"`
 }
 
 func main() {
@@ -48,7 +48,7 @@ func doEvery(d time.Duration, f func(time.Time)) {
 	}
 }
 func webhookEvent(c echo.Context) error {
-	var body interface{}
+	body := new(DMevent)
 	if err := c.Bind(body); err != nil {
 		log.Print("ERROR", err)
 		return err
