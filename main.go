@@ -58,7 +58,7 @@ func webhookEvent(c echo.Context) error {
 
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
-		if strings.Contains(val.Message.Data.Text, "HELL") {
+		if strings.Contains(val.Message.Data.Text, "HELL") && val.Message.SenderID != "1215181869567725568" {
 			_, _, err := client.Statuses.Update(val.Message.Data.Text, nil)
 			if err != nil {
 				log.Print(err)
