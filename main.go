@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,14 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/labstack/echo/v4"
+
+	firebase "firebase.google.com/go"
+	"firebase.google.com/go/db"
 )
 
 var (
 	client              *twitter.Client
+	Conn                Connection
 	CONSUMER_KEY_SECRET = os.Getenv("CONSUMER_SECRET_KEY")
 	CONSUMER_KEY        = os.Getenv("CONSUMER_KEY")
 	ACCESS_TOKEN        = os.Getenv("ACCESS_TOKEN")
@@ -32,6 +37,10 @@ type Request struct {
 type DMEvent struct {
 	ForUserID           string                       `json:"for_user_id"`
 	DirectMessageEvents []twitter.DirectMessageEvent `json:"direct_message_events"`
+}
+
+type Connection struct {
+	DBConn *db.Client
 }
 
 func main() {
@@ -55,10 +64,15 @@ func webhookEvent(c echo.Context) error {
 		log.Print("ERROR", err)
 		return err
 	}
+	ctx := context.Background()
 
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
 		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
+
+			if err := Conn.DBConn.NewRef("messages").Set(ctx, val.Message.Data); err != nil {
+				log.Fatal(err)
+			}
 			go func() {
 				time.Sleep(time.Minute * 5)
 				postTweet(val.Message.Data.Text)
@@ -85,6 +99,25 @@ func init() {
 	// for {
 	// 	doEvery(2*time.Second, forFun)
 	// }
+
+	ctx := context.Background()
+	configDB := &firebase.Config{
+		DatabaseURL: "https://twttr-bot-3dd9a.firebaseio.com/",
+	}
+	app, err := firebase.NewApp(ctx, configDB)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client, err := app.Database(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	Conn = Connection{
+		DBConn: client,
+	}
+
 }
 
 func CRC(c echo.Context) error {
