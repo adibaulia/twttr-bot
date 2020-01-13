@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"crypto/hmac"
@@ -29,33 +30,8 @@ type Request struct {
 }
 
 type DMEvent struct {
-	ForUserID           string                `json:"for_user_id"`
-	DirectMessageEvents []DirectMessageEvents `json:"direct_message_events"`
-}
-type Target struct {
-	RecipientID string `json:"recipient_id"`
-}
-type Entities struct {
-	Hashtags     []interface{} `json:"hashtags"`
-	Symbols      []interface{} `json:"symbols"`
-	UserMentions []interface{} `json:"user_mentions"`
-	Urls         []interface{} `json:"urls"`
-}
-type MessageData struct {
-	Text     string   `json:"text"`
-	Entities Entities `json:"entities"`
-}
-type MessageCreate struct {
-	Target      Target      `json:"target"`
-	SenderID    string      `json:"sender_id"`
-	SourceAppID string      `json:"source_app_id"`
-	MessageData MessageData `json:"message_data"`
-}
-type DirectMessageEvents struct {
-	Type             string        `json:"type"`
-	ID               string        `json:"id"`
-	CreatedTimestamp string        `json:"created_timestamp"`
-	MessageCreate    MessageCreate `json:"message_create"`
+	ForUserID           string                       `json:"for_user_id"`
+	DirectMessageEvents []twitter.DirectMessageEvent `json:"direct_message_events"`
 }
 
 func main() {
@@ -80,7 +56,16 @@ func webhookEvent(c echo.Context) error {
 		return err
 	}
 
-	log.Print(body)
+	for _, val := range body.DirectMessageEvents {
+		log.Print(val.Message.Data.Text)
+		if strings.Contains(val.Message.Data.Text, "HELL") {
+			_, _, err := client.Statuses.Update(val.Message.Data.Text, nil)
+			if err != nil {
+				log.Print(err)
+			}
+		}
+	}
+
 	return nil
 
 }
