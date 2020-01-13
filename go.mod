@@ -11,4 +11,5 @@ require (
 	github.com/labstack/echo/v4 v4.1.13
 	golang.org/x/crypto v0.0.0-20200109152110-61a87790db17 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
+	google.golang.org/api v0.15.0
 )

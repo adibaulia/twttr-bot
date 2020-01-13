@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +17,10 @@ import (
 	"github.com/dghubble/oauth1"
 	"github.com/labstack/echo/v4"
 
+	firebase "firebase.google.com/go"
 	"firebase.google.com/go/db"
+
+	"google.golang.org/api/option"
 )
 
 var (
@@ -62,7 +67,7 @@ func webhookEvent(c echo.Context) error {
 		log.Print("ERROR", err)
 		return err
 	}
-	// ctx := context.Background()
+	ctx := context.Background()
 
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
@@ -71,6 +76,11 @@ func webhookEvent(c echo.Context) error {
 			// if err := Conn.DBConn.NewRef("messages").Set(ctx, val.Message.Data); err != nil {
 			// 	log.Fatal(err)
 			// }
+			ref := Conn.DBConn.NewRef("/")
+			if err := ref.Set(ctx, val.Message.Data); err != nil {
+				log.Fatalln("Error reading from database:", err)
+			}
+
 			go func() {
 				time.Sleep(time.Minute * 5)
 				postTweet(val.Message.Data.Text)
@@ -89,6 +99,10 @@ func postTweet(text string) {
 }
 
 func init() {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	config := oauth1.NewConfig(CONSUMER_KEY, CONSUMER_KEY_SECRET)
 	token := oauth1.NewToken(ACCESS_TOKEN, ACCESS_SECRET)
 	httpClient := config.Client(oauth1.NoContext, token)
@@ -97,24 +111,21 @@ func init() {
 	// for {
 	// 	doEvery(2*time.Second, forFun)
 	// }
-
-	// ctx := context.Background()
-	// configDB := &firebase.Config{
-	// 	DatabaseURL: "https://twttr-bot-3dd9a.firebaseio.com/",
-	// }
-	// app, err := firebase.NewApp(ctx, configDB)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// client, err := app.Database(ctx)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// Conn = Connection{
-	// 	DBConn: client,
-	// }
+	ctx := context.Background()
+	opt := option.WithCredentialsFile(dir + "twttr-bot-3dd9a-firebase-adminsdk-a9cni-2c1179fc4a.json")
+	configDB := &firebase.Config{
+		ProjectID:   "twttr-bot-3dd9a",
+		DatabaseURL: "https://twttr-bot-3dd9a.firebaseio.com",
+	}
+	app, err := firebase.NewApp(context.Background(), configDB, opt)
+	if err != nil {
+		log.Print(fmt.Errorf("error initializing app: %v", err))
+	}
+	clientDB, err := app.Database(ctx)
+	if err != nil {
+		log.Fatalln("Error initializing database client:", err)
+	}
+	Conn = Connection{DBConn: clientDB}
 
 }
 
