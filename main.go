@@ -16,8 +16,11 @@ import (
 )
 
 var (
-	client       *twitter.Client
-	CONSUMER_KEY = os.Getenv("CONSUMER_SECRET_KEY")
+	client              *twitter.Client
+	CONSUMER_KEY_SECRET = os.Getenv("CONSUMER_SECRET_KEY")
+	CONSUMER_KEY        = os.Getenv("CONSUMER_KEY")
+	ACCESS_TOKEN        = os.Getenv("ACCESS_TOKEN")
+	ACCESS_SECRET       = os.Getenv("ACCESS_SECRET")
 )
 
 type Request struct {
@@ -45,14 +48,14 @@ func webhookEvent(c echo.Context) error {
 }
 
 func init() {
-	config := oauth1.NewConfig(os.Getenv("CONSUMER_KEY"), os.Getenv("CONSUMER_SECRET_KEY"))
-	token := oauth1.NewToken(os.Getenv("ACCESS_TOKEN"), os.Getenv("ACCESS_SECRET"))
+	config := oauth1.NewConfig(CONSUMER_KEY, CONSUMER_KEY_SECRET)
+	token := oauth1.NewToken(ACCESS_TOKEN, ACCESS_SECRET)
 	httpClient := config.Client(oauth1.NoContext, token)
 	// Twitter client
 	client = twitter.NewClient(httpClient)
-	for {
-		doEvery(2*time.Second, forFun)
-	}
+	// for {
+	// 	doEvery(2*time.Second, forFun)
+	// }
 }
 
 func CRC(c echo.Context) error {
@@ -62,7 +65,7 @@ func CRC(c echo.Context) error {
 		return err
 	}
 
-	secret := []byte(CONSUMER_KEY)
+	secret := []byte(CONSUMER_KEY_SECRET)
 	message := []byte(body.Crc_token)
 
 	hash := hmac.New(sha256.New, secret)
