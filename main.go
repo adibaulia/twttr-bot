@@ -111,6 +111,7 @@ func init() {
 	// for {
 	// 	doEvery(2*time.Second, forFun)
 	// }
+	log.Print(dir)
 	ctx := context.Background()
 	opt := option.WithCredentialsFile(dir + "twttr-bot-3dd9a-firebase-adminsdk-a9cni-2c1179fc4a.json")
 	configDB := &firebase.Config{
