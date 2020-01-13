@@ -60,7 +60,7 @@ func init() {
 
 func CRC(c echo.Context) error {
 	body := new(Request)
-	if err := c.Bind(&body); err != nil {
+	if err := c.Bind(body); err != nil {
 		log.Print("ERROR", err)
 		return err
 	}
@@ -75,7 +75,7 @@ func CRC(c echo.Context) error {
 	token := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
 	resp := map[string]string{
-		"response_token": token,
+		"response_token": "sha256=" + token,
 	}
 	return c.JSON(http.StatusOK, resp)
 }
