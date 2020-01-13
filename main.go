@@ -48,13 +48,13 @@ func doEvery(d time.Duration, f func(time.Time)) {
 	}
 }
 func webhookEvent(c echo.Context) error {
-	body := new(DM)
+	var body interface{}
 	if err := c.Bind(body); err != nil {
 		log.Print("ERROR", err)
 		return err
 	}
 
-	log.Print(body.DirectMessageEvent.(string))
+	log.Print(body)
 	return nil
 
 }
