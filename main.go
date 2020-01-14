@@ -24,43 +24,39 @@ import (
 )
 
 var (
-	client              *twitter.Client
 	Conn                Connection
 	CONSUMER_KEY_SECRET = os.Getenv("CONSUMER_SECRET_KEY")
 	CONSUMER_KEY        = os.Getenv("CONSUMER_KEY")
 	ACCESS_TOKEN        = os.Getenv("ACCESS_TOKEN")
 	ACCESS_SECRET       = os.Getenv("ACCESS_SECRET")
+	PORT                = os.Getenv("PORT")
 )
 
-type Request struct {
-	Tweet     string `json:"tweet,omitempty"`
-	Crc_token string `json:"crc_token,omitempty" form:"crc_token" query:"crc_token"`
-}
-
-type DMEvent struct {
-	ForUserID           string                       `json:"for_user_id"`
-	DirectMessageEvents []twitter.DirectMessageEvent `json:"direct_message_events"`
-}
-
-type Connection struct {
-	DBConn *db.Client
-}
+type (
+	Request struct {
+		Tweet     string `json:"tweet,omitempty"`
+		Crc_token string `json:"crc_token,omitempty" form:"crc_token" query:"crc_token"`
+	}
+	DMEvent struct {
+		ForUserID           string                       `json:"for_user_id"`
+		DirectMessageEvents []twitter.DirectMessageEvent `json:"direct_message_events"`
+	}
+	Connection struct {
+		DBConn    *db.Client
+		TwtClient *twitter.Client
+	}
+)
 
 func main() {
-	port := os.Getenv("PORT")
 	e := echo.New()
 	tweet := e.Group("/tweet")
 	tweet.POST("/create", createTweet)
+
 	e.POST("/dev/webhooks", webhookEvent)
 	e.GET("/dev/webhooks", CRC)
-	e.Logger.Fatal(e.Start(":" + port))
+	e.Logger.Fatal(e.Start(":" + PORT))
 }
 
-func doEvery(d time.Duration, f func(time.Time)) {
-	for x := range time.Tick(d) {
-		f(x)
-	}
-}
 func webhookEvent(c echo.Context) error {
 	body := new(DMEvent)
 	if err := c.Bind(body); err != nil {
@@ -71,27 +67,21 @@ func webhookEvent(c echo.Context) error {
 
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
-		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
 
-			// if err := Conn.DBConn.NewRef("messages").Set(ctx, val.Message.Data); err != nil {
-			// 	log.Fatal(err)
-			// }
+		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
 			ref := Conn.DBConn.NewRef("/")
 			if err := ref.Set(ctx, &val.Message.Data); err != nil {
 				log.Fatalln("Error reading from database:", err)
 			}
-
-			go func() {
-				time.Sleep(time.Minute * 5)
-				postTweet(val.Message.Data.Text)
-			}()
+			time.Sleep(time.Minute * 5)
+			postTweet(val.Message.Data.Text)
 		}
 	}
 	return nil
 }
 
 func postTweet(text string) {
-	tweet, _, err := client.Statuses.Update(text, nil)
+	tweet, _, err := Conn.TwtClient.Statuses.Update(text, nil)
 	if err != nil {
 		log.Print(err)
 	}
@@ -107,11 +97,7 @@ func init() {
 	token := oauth1.NewToken(ACCESS_TOKEN, ACCESS_SECRET)
 	httpClient := config.Client(oauth1.NoContext, token)
 	// Twitter client
-	client = twitter.NewClient(httpClient)
-	// for {
-	// 	doEvery(2*time.Second, forFun)
-	// }
-	log.Print(dir)
+	TwtClient := twitter.NewClient(httpClient)
 	ctx := context.Background()
 	opt := option.WithCredentialsFile(dir + "/twttr-bot-3dd9a-firebase-adminsdk-a9cni-2c1179fc4a.json")
 	configDB := &firebase.Config{
@@ -126,7 +112,10 @@ func init() {
 	if err != nil {
 		log.Fatalln("Error initializing database client:", err)
 	}
-	Conn = Connection{DBConn: clientDB}
+	Conn = Connection{
+		DBConn:    clientDB,
+		TwtClient: TwtClient,
+	}
 
 }
 
