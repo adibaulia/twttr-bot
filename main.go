@@ -63,21 +63,36 @@ func webhookEvent(c echo.Context) error {
 		log.Print("ERROR", err)
 		return err
 	}
-	ctx := context.Background()
 
 	for _, val := range body.DirectMessageEvents {
 		log.Print(val.Message.Data.Text)
 
 		if (strings.Contains(val.Message.Data.Text, "HI!") || strings.Contains(val.Message.Data.Text, "hi!") || strings.Contains(val.Message.Data.Text, "Hi!")) && val.Message.SenderID != "1215181869567725568" {
-			ref := Conn.DBConn.NewRef("/")
-			if err := ref.Set(ctx, &val.Message.Data); err != nil {
-				log.Fatalln("Error reading from database:", err)
-			}
+			addToFirebase(val.Message.Data.Text)
 			time.Sleep(time.Minute * 5)
 			postTweet(val.Message.Data.Text)
 		}
 	}
 	return nil
+}
+
+func addToFirebase(message string) {
+	var temp string
+	ctx := context.Background()
+	ref := Conn.DBConn.NewRef("/")
+	if err := ref.Get(ctx, &temp); err != nil {
+		log.Fatalln("Error reading from database:", err)
+	}
+
+	var messages []string
+	messages = append(messages, temp)
+	messages = append(messages, message)
+
+	log.Print(temp)
+	log.Print(messages)
+	if err := ref.Set(ctx, &messages); err != nil {
+		log.Fatalln("Error reading from database:", err)
+	}
 }
 
 func postTweet(text string) {
