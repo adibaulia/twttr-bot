@@ -94,8 +94,8 @@ func addToFirebase(message string) {
 	messages = append(messages, temp)
 	messages = append(messages, mess)
 	log.Print(temp)
-	//log.Print(messages)
-	if err := ref.Set(ctx, &temp); err != nil {
+	log.Print(messages)
+	if err := ref.Set(ctx, &messages); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
 }
