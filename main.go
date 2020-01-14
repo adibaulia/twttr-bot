@@ -45,6 +45,9 @@ type (
 		DBConn    *db.Client
 		TwtClient *twitter.Client
 	}
+	DBStruct struct {
+		text string `json:"text"`
+	}
 )
 
 func main() {
@@ -77,17 +80,18 @@ func webhookEvent(c echo.Context) error {
 }
 
 func addToFirebase(message string) {
-	var temp string
+	var temp DBStruct
+	mess := DBStruct{
+		text: message,
+	}
 	ctx := context.Background()
 	ref := Conn.DBConn.NewRef("/")
 	if err := ref.Get(ctx, &temp); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
-
-	var messages []string
+	var messages []DBStruct
 	messages = append(messages, temp)
-	messages = append(messages, message)
-
+	messages = append(messages, mess)
 	log.Print(temp)
 	log.Print(messages)
 	if err := ref.Set(ctx, &messages); err != nil {
