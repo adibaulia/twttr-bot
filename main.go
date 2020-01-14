@@ -148,21 +148,11 @@ func createTweet(c echo.Context) error {
 		return err
 	}
 	// Send a Tweet
-	tweet, resp, err := client.Statuses.Update(body.Tweet, nil)
+	tweet, resp, err := Conn.TwtClient.Statuses.Update(body.Tweet, nil)
 	if err != nil {
 		log.Print(err)
 		return c.JSON(http.StatusBadRequest, http.Response{Status: err.Error()})
 	}
 	log.Print(resp)
 	return c.JSON(http.StatusOK, http.Response{Status: tweet.Text})
-}
-
-func forFun(t time.Time) {
-	now := time.Now().Format("030405")
-	tweet := `_________ is the cutest girl i ever met ` + `(` + now + `)`
-	_, resp, err := client.Statuses.Update(tweet, nil)
-	if err != nil {
-		log.Print(err)
-	}
-	log.Print(resp)
 }
