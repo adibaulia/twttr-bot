@@ -80,21 +80,20 @@ func webhookEvent(c echo.Context) error {
 }
 
 func addToFirebase(message string) {
-	var temp interface{}
-	mess := DBStruct{
-		text: message,
+	var temp []map[string]string
+	mess := map[string]string{
+		"text": message,
 	}
 	ctx := context.Background()
 	ref := Conn.DBConn.NewRef("/")
 	if err := ref.Get(ctx, &temp); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
-	var messages []DBStruct
-	//messages = append(messages, temp)
-	messages = append(messages, mess)
-	log.Print(temp.(string))
+
+	temp = append(temp, mess)
+	log.Print(temp)
 	//log.Print(messages)
-	if err := ref.Set(ctx, &messages); err != nil {
+	if err := ref.Set(ctx, &temp); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
 }
