@@ -46,7 +46,7 @@ type (
 		TwtClient *twitter.Client
 	}
 	DBStruct struct {
-		text string `json:"text"`
+		Text string `json:"text"`
 	}
 )
 
@@ -80,7 +80,6 @@ func webhookEvent(c echo.Context) error {
 }
 
 func addToFirebase(message string) {
-	var temp map[string]string
 	var messages []map[string]string
 	mess := map[string]string{
 		"text": message,
@@ -93,7 +92,6 @@ func addToFirebase(message string) {
 
 	//	messages = append(messages, temp)
 	messages = append(messages, mess)
-	log.Print(temp)
 	log.Print(messages)
 	if err := ref.Set(ctx, &messages); err != nil {
 		log.Fatalln("Error reading from database:", err)
