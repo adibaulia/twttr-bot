@@ -80,7 +80,7 @@ func webhookEvent(c echo.Context) error {
 }
 
 func addToFirebase(message string) {
-	var temp DBStruct
+	var temp interface{}
 	mess := DBStruct{
 		text: message,
 	}
@@ -90,10 +90,10 @@ func addToFirebase(message string) {
 		log.Fatalln("Error reading from database:", err)
 	}
 	var messages []DBStruct
-	messages = append(messages, temp)
+	//messages = append(messages, temp)
 	messages = append(messages, mess)
-	log.Print(temp)
-	log.Print(messages)
+	log.Print(temp.(string))
+	//log.Print(messages)
 	if err := ref.Set(ctx, &messages); err != nil {
 		log.Fatalln("Error reading from database:", err)
 	}
